@@ -4,24 +4,14 @@ stages:
   - deploy
 
 before_script:
-  - apk --update add nodejs nodejs-npm bash python py-pip
-  - pip install awscli
-  - wget -q -O - https://cli-assets.heroku.com/install.sh | sh
-  - npm config set unsafe-perm true
-  - npm install -g yarn
-  - echo testtest
+  - apk --update add bash python py-pip
+  - pip install twine
 
 services:
   - docker:stable-dind
 
-deploy-api-and-web:
+release:
   stage: deploy
   when: manual
   script:
-    - bin/deploy-server
-
-release-clients:
-  stage: deploy
-  # when: manual
-  script:
-    - bin/release-clients
+    - bin/release
