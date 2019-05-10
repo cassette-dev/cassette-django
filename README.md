@@ -1,11 +1,13 @@
 ## Django middleware for cassette.dev
 
-Add `django-cassette` to your installed apps.
+Install with `pip install cassette-django`
+
+Add `cassette_django` to your installed apps.
 
 ```
 INSTALLED_APPS = [
     ...
-    'django-cassette',
+    'cassette_django',
     ...
 ]
 ```
@@ -15,7 +17,7 @@ Add the middleware as at the end of the middleware list
 ```
 MIDDLEWARE = [
     ...
-    'django_cassette.middleware.CassetteMiddleware,
+    'cassette_django.middleware.CassetteMiddleware,
 ]
 ```
 
