@@ -5,7 +5,7 @@ stages:
 
 before_script:
   - apk --update add bash python py-pip
-  - pip install twine
+  - pip install twine setuptools wheel
 
 services:
   - docker:stable-dind
