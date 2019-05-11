@@ -21,5 +21,5 @@ MIDDLEWARE = [
 ]
 ```
 
-Now you're good to go! To import your API just install cassette's cli (`npm install -g @cassette.dev/cli` or read more at [npmjs.com](https://www.npmjs.com/package/@cassette.dev/cli))
+Now you're good to go! To import your API just install cassette's cli (`npm install -g @cassette.dev/cassette-cli` or read more at [npmjs.com](https://www.npmjs.com/package/@cassette.dev/cassette-cli))
 and follow the instructions.
