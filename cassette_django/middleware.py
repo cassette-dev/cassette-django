@@ -3,6 +3,9 @@ import os
 import re
 import urllib
 import errno
+import json
+import base64
+import functools
 
 
 class CassetteMiddleware(object):
@@ -21,26 +24,21 @@ class CassetteMiddleware(object):
         response = self.get_response(request)
         response_body = self.parse_response_body(response)
 
-        entry = (
-            ("request.path", request.path),
-            ("request.method", request.method),
-            ("request.body", request_body),
-            ("response.status", str(response.status_code)),
-            ("response.body", response_body),
-        )
+        request_headers = [ [self.normalize_header_key(k), str(v)] for (k,v) in request.META.items() if k == "CONTENT_TYPE" or (k != "HTTP_COOKIE" and k.startswith("HTTP_")) ]
+        response_headers = [ [self.normalize_header_key(item[0]), str(item[1])] for item in list(response.items()) ]
+        entry = {
+            "path": request.path,
+            "method": request.method,
+            "status": response.status_code,
+            "request_query": request.META.get("QUERY_STRING", None),
+            "request_cookies": self.kv_list_to_dict(request.COOKIES.items()),
+            "request_headers": self.kv_list_to_dict(request_headers),
+            "request_body": request_body,
+            "response_body": response_body,
+            "response_headers": self.kv_list_to_dict(response_headers),
+        }
 
-        list_values = [
-            ("request.query", [ f"{k}={v}" for (k,v) in request.GET.items() ]),
-            ("request.cookies", [ f"{k}={v}" for (k,v) in request.COOKIES.items() ]),
-            ("request.headers", [ f"{self.normalize_header_key(k)}={str(v)}" for (k,v) in request.META.items() if k == "CONTENT_TYPE" or k.startswith("HTTP_") ]),
-            ("response.headers", [ f"{self.normalize_header_key(item[0])}={str(item[1])}" for item in list(response.items()) ]),
-        ]
-
-        for each in list_values:
-            for value in each[1]:
-                entry = (*entry, (each[0], value))
-
-        content = urllib.parse.urlencode(entry)
+        content = json.dumps(entry)
         try:
             with open(bulk_file_path, "a") as f:
                 fcntl.flock(f, fcntl.LOCK_EX)
@@ -55,16 +53,17 @@ class CassetteMiddleware(object):
         return response
 
     def parse_request_body(self, request):
-        try:
-            return request.body.decode()
-        except:
-            return request.body
+        return base64.b64encode(request.body).decode()
 
     def parse_response_body(self, response):
-        try:
-            return response.content.decode()
-        except:
-            return response.content
+        return base64.b64encode(response.content).decode()
 
     def normalize_header_key(self, key):
         return re.sub('^http-', '', key.lower().replace("_", "-"))
+
+    def kv_list_to_dict(self, kv_list):
+        dct = {}
+        for (key, value) in kv_list:
+            dct.setdefault(key, [])
+            dct[key].append(value)
+        return dct
