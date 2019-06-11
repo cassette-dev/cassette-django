@@ -1,0 +1,19 @@
+trigger:
+  - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: cassette
+
+steps:
+  - bash: |
+      set -e
+      sudo apt-get install python3 python3-pip
+      pip install twine setuptools wheel
+      ./bin/release
+    displayName: "Publish package"
+    env:
+      TWINE_USERNAME: $(TWINE_USERNAME)
+      TWINE_PASSWORD: $(TWINE_PASSWORD)
